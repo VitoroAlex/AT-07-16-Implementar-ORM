@@ -1,0 +1,78 @@
+# Código do CompradorRepository:
+
+import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.dao.Dao;
+import java.sql.SQLException;
+import com.j256.ormlite.table.TableUtils;
+import java.util.List;
+import java.util.ArrayList;
+
+public class CompradorRepository
+{
+    private static Database database;
+    private static Dao<Comprador, Integer> dao;
+    private List<Comprador> loadedCompradores;
+    private Comprador loadedComprador; 
+    
+    public CompradorRepository(Database database) {
+        CompradorRepository.setDatabase(database);
+        loadedCompradores = new ArrayList<Comprador>();
+    }
+    
+    public static void setDatabase(Database database) {
+        CompradorRepository.database = database;
+        try {
+            dao = DaoManager.createDao(database.getConnection(), Comprador.class);
+            TableUtils.createTableIfNotExists(database.getConnection(), Comprador.class);
+        }
+        catch(SQLException e) {
+            System.out.println(e);
+        }            
+    }
+    
+    public Comprador create(Comprador comprador) {
+        int nrows = 0;
+        try {
+            nrows = dao.create(comprador);
+            if ( nrows == 0 )
+                throw new SQLException("Error: object not saved");
+            this.loadedComprador = comprador;
+            loadedCompradores.add(comprador);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return comprador;
+    }    
+
+    public void update(Comprador comprador) {
+        // TODO
+    }
+
+    public void delete(Comprador comprador) {
+        // TODO
+    }
+    
+    public Comprador loadFromId(int id) {
+        try {
+            this.loadedComprador = dao.queryForId(id);
+            if (this.loadedComprador != null)
+                this.loadedCompradores.add(this.loadedComprador);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return this.loadedComprador;
+    }    
+    
+    public List<Comprador> loadAll() {
+        try {
+            this.loadedCompradores =  dao.queryForAll();
+            if (this.loadedCompradores.size() != 0)
+                this.loadedComprador = this.loadedCompradores.get(0);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return this.loadedCompradores;
+    }
+
+    // getters and setters ommited...        
+}
